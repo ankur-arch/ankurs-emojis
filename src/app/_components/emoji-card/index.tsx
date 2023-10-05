@@ -1,15 +1,21 @@
-import { prisma } from "@/server/db"
-import { ButtonCard } from "./button-card"
-import { formatPrompt } from "@/lib/utils"
+import { prisma } from "@/server/db";
+import { ButtonCard } from "./button-card";
+import { formatPrompt } from "@/lib/utils";
 
 interface EmojiCardProps {
-  id: string
-  alwaysShowDownloadBtn?: boolean
+  id: string;
+  alwaysShowDownloadBtn?: boolean;
 }
 
 export async function EmojiCard({ id, alwaysShowDownloadBtn }: EmojiCardProps) {
-  const data = await prisma.emoji.findUnique({ where: { id } })
-  if (!data) return null
+  const { data } = await prisma.emoji.findUnique({
+    where: { id },
+    cacheStrategy: {
+      ttl: 60,
+    },
+  }).withAccelerateInfo();
+
+  if (!data) return null;
 
   return (
     <ButtonCard
@@ -19,5 +25,5 @@ export async function EmojiCard({ id, alwaysShowDownloadBtn }: EmojiCardProps) {
       createdAt={data.createdAt}
       alwaysShowDownloadBtn={alwaysShowDownloadBtn}
     />
-  )
+  );
 }
